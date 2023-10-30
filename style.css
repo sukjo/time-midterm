@@ -1,0 +1,108 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  font-size: 14px;
+}
+
+p {
+  color: blanchedalmond;
+  font-family: "Bona Nova", serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+body {
+  background-color: darkolivegreen;
+  overflow: hidden;
+}
+
+nav {
+  display: flex;
+  position: absolute;
+  left: 0px;
+  bottom: 0px;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 1rem;
+}
+
+button {
+  color: blanchedalmond;
+  border: none;
+  /* border-bottom: 2px solid blanchedalmond; */
+  background: transparent;
+  font-size: 3rem;
+  font-family: "Bona Nova", serif;
+  font-weight: 700;
+  font-style: normal;
+
+  & :hover {
+    cursor: pointer;
+  }
+}
+
+#explanationContainer {
+  display: flex;
+  flex-direction: row;
+  width: 30%;
+  height: fit-content;
+  z-index: 5;
+  margin: 1rem;
+}
+
+#about_button {
+  margin-left: auto;
+  margin-right: 0;
+}
+
+#fenceContainer {
+  position: absolute;
+  width: 100vw;
+  height: calc(100vh - 6rem);
+  z-index: 1;
+}
+
+#fence {
+  position: relative;
+  border-image: url();
+  /* background-color: hsl(82, 39%, 20%); */
+  font-size: 2rem;
+}
+
+#modalContainer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(10, 10, 10, 0.6);
+  z-index: 10;
+}
+
+canvas {
+  position: absolute;
+  z-index: -5;
+  top: 0;
+  left: 0;
+}
+
+#modal {
+  position: relative;
+  width: 500px;
+  height: 200px;
+  top: calc(50% - 200px / 2);
+  left: calc(50% - 500px / 2);
+  text-align: center;
+  font-size: 2rem;
+}
+
+#modalButtonsContainer {
+  margin: 1rem;
+  display: flex;
+  justify-content: space-evenly;
+  gap: 1rem;
+}
