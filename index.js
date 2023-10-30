@@ -3,9 +3,8 @@ let chosenEvent = null;
 let fenceW, fenceH;
 
 // TODO(developer): Set to client ID and API key from the Developer Console
-const CLIENT_ID =
-  "121936930744-flf735hnbsmb7d3dremltg9adal7q8ii.apps.googleusercontent.com";
-const API_KEY = "AIzaSyAbACdW8kF9HKRcDj08AGt2ZcW0xroiM8s";
+const CLIENT_ID = "";
+const API_KEY = "";
 
 // Discovery doc URL for APIs used by the quickstart
 const DISCOVERY_DOC =
