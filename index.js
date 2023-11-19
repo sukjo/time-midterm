@@ -1,10 +1,14 @@
-let events = null;
-let chosenEvent = null;
-let fenceW, fenceH;
+// import setFenceSize from "./setFenceSize";
+// import Scene from "./src/Scene";å
 
-// TODO(developer): Set to client ID and API key from the Developer Console
-const CLIENT_ID = "";
-const API_KEY = "";
+// import apiConfig from "./src/api.js";
+const CLIENT_ID = apiConfig.clientId;
+const API_KEY = apiConfig.apiKey;
+
+let events = null;
+let chosenCalsID = [];
+let chosenEvent = null;
+// let fenceW, fenceH;
 
 // Discovery doc URL for APIs used by the quickstart
 const DISCOVERY_DOC =
@@ -78,6 +82,7 @@ function handleAuthClick() {
     $("#addspace_button").show();
     $("#authorize_button").hide();
     // $("#authorize_button").innerText = "Refresh";
+    await getCalendarList();
     await listUpcomingEvents();
   };
 
@@ -106,7 +111,7 @@ function handleSignoutClick() {
     // $("#fence").hide();
   }
 }
-
+/*
 function setFenceSize(totalFreeTime) {
   //   const avgSleepDuration = 60 * 8 * 7;
   //   const wakingMinsPerWeek = 10080 - avgSleepDuration;
@@ -131,11 +136,12 @@ function setFenceSize(totalFreeTime) {
     fenceW = Math.floor(fenceH * aspectRatio);
   }
 
+  setEnclosure(fenceW, fenceH);
   setFlora("\\|/", 500, 12);
   setFlora("⚚", 20, 18);
   setFlora("⚘", 20, 16);
   setFlora("✿", 20, 16);
-  setEnclosure(fenceW, fenceH);
+  setFence();
   setSheep(fenceW / 2, fenceH / 2);
 
   //   $("#fence")
@@ -150,7 +156,7 @@ function setFenceSize(totalFreeTime) {
 
   console.log("fence size set to " + fenceW + " by " + fenceH);
 }
-
+*/
 function addSpace() {
   chosenEvent = events[Math.floor(Math.random() * events.length)];
 
@@ -170,11 +176,27 @@ function closeModal() {
   $("#modalContainer").toggle();
 }
 
-/**
- * Print the summary and start datetime/date of the next events in
- * the authorized user's calendar. If no events are found an
- * appropriate message is printed.
- */
+async function getCalendarList() {
+  let response;
+  try {
+    response = await gapi.client.calendar.calendarList.list({});
+
+    const calendars = response.result.items;
+    const ownedCalendars = calendars.filter((cal) => {
+      if (cal.accessRole == "owner") {
+        return true;
+      }
+      return false;
+    });
+
+    ownedCalendars.forEach((cal) => {
+      chosenCalsID += cal.id;
+    });
+    console.log(chosenCalsID);
+  } catch (err) {
+    console.error("getCalendarList error", err);
+  }
+}
 
 //  if you want, put below function inside a settimeout to keep events updated
 async function listUpcomingEvents() {
@@ -202,30 +224,32 @@ async function listUpcomingEvents() {
   events = response.result.items;
   console.log(events);
 
-  // Get aggregate time of events (busy times)
-  /*
-  let totalMinutes = 0;
-  let totalHours = 0;
-  let totalModMins = 0; */
-
   let totalMillis = 0;
 
   if (events.length > 0) {
-    events.forEach((ev) => {
+    // filter out "declined" or "needsAction" events
+    const acceptedEvents = events.filter((ev) => {
+      if (ev.creator.self) {
+        return true;
+      }
+
+      if (ev.attendees) {
+        for (const person of ev.attendees) {
+          if (person.self && person.responseStatus == "accepted") {
+            return true;
+          }
+        }
+      }
+      return false; // discard the event if none of the above apply
+    });
+
+    // Get aggregate time of events (busy times), excluding events that were not accepted
+    acceptedEvents.forEach((ev) => {
       const startDateTime = new Date(ev.start.dateTime);
       const endDateTime = new Date(ev.end.dateTime);
 
       const millisPerEv = endDateTime - startDateTime; // find duration of each event in millis
       totalMillis += millisPerEv;
-
-      /*
-      const minsPerEv = Math.floor(millisPerEv / 60000); // convert ms to mins
-      const hoursPerEv = Math.floor(minsPerEv / 60); // convert mins to hrs
-      const modMinsPerEv = Math.floor(minsPerEv % 60); // find leftover mins
-
-      totalMinutes += minsPerEv;
-      totalHours += hoursPerEv;
-      totalModMins += modMinsPerEv;*/
     });
 
     // Calculate total busy time
@@ -243,7 +267,9 @@ async function listUpcomingEvents() {
     const totalFreeTime = wakingMinsPerWeek - totalMinutes;
 
     console.log(`free time: ${totalFreeTime} minutes`);
-    setFenceSize(totalFreeTime);
+    const scene = new Scene($(window).width(), $(window).height());
+    scene.setFenceSize(totalFreeTime);
+    scene.drawScene();
 
     // Update explanation
     $("#explanationContainer > p").text(
